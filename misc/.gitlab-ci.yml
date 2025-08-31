@@ -1,0 +1,25 @@
+image: node:20-alpine
+
+stages:
+  - build
+
+variables:
+  REGISTRY: git.xxx.org:4567/practitest-migration-tool #to be fixed
+  YARN_INSTALL_COMMAND: yarn install --cache-folder .yarn
+
+package-docker:
+  image: docker:stable
+  stage: build
+  interruptible: true
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+#   👇 Builds new docker image, with 2 tags: latest and version number from tag
+    - docker build --cache-from=$REGISTRY:latest -t $REGISTRY:latest -t $REGISTRY:$CI_COMMIT_REF_SLUG -f ./misc/Dockerfile .
+    - docker push $REGISTRY:latest
+    - docker push $REGISTRY:$CI_COMMIT_REF_SLUG
+  only:
+#   👇 Builds only when tag with name "release-x.x.x" is created
+    - /^release-(\d+[\.]?).*$/
+    - /^prerelease-(\d+[\.]?).*$/
+    - PRAC-24-duplicates-preventing-algorithm
+    - main

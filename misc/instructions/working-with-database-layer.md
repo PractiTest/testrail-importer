@@ -1,0 +1,63 @@
+# Working with the database layer
+
+## How to organize migration
+
+Think of migration as of a single granular fact of updating the database.
+
+Speaking about when to group changes into a single migration file, and when to keep them separate, try to find a balance between the next two rules:
+- If the changes you are making are all related to the same migration purpose, it may be better to group them together in a single migration file. For example, if you are making changes to support a new feature in your application, these changes could all be grouped together in a single migration file.
+- Changes should be manageable: It's important to keep each migration file manageable in size so that it's easier to review, test, and deploy. If a migration file becomes too large, it may be more difficult to manage and could increase the risk of errors or issues.
+
+Overall, the goal should be to group related database changes together in a way that makes sense and improves the overall manageability and readability of your database schema.
+
+## How to generate DB migrations
+// Describe when implemented
+
+## How to deal with enum values
+The recommended way of storing enumerable values to the database is `lookup tables`.
+
+Using a lookup table to store enumerated values in a database can offer several benefits, including:
+- Readability: Storing enumerated values as integers or strings in the main table can make it difficult to understand what the values represent without additional context. A lookup table, on the other hand, can provide clear and descriptive names for the enumerated values, making it easier to understand the data in the database.
+- Flexibility: If the list of enumerated values changes frequently, storing them in a separate lookup table can make it easier to update the values without changing the structure of the main table. This can be particularly important in applications that are updated frequently or have a large number of enumerated values.
+- Maintainability: A lookup table can help to ensure that enumerated values are consistent across the application. This can be particularly important in larger applications where multiple developers may be working on different parts of the codebase.
+
+* Even when Postgres supports managing enum types, since version 10, lookup tables still seem a good choice 
+***
+If the case of our application, any enumerable set of values related to any of database entities should be first described as a TypeScript enum (usually in the `shared` library, so all the parts can be reusing it).
+
+Enum members should have their values constantly set. 
+**To keep identifiers typing consistent across the app, you should probably use pregenerated `UUID`**
+```typescript
+export enum UserRolesEnum {
+  Admin = '25e102f4-7ee1-4fca-9071-f16e03da237b',
+  User = '12c57649-f88c-4c97-9a75-3e5ffef1b9d6'
+}
+```
+After enum is declared, it's value should be inserted into the database within some migration 
+
+After the enum is created, it should be used to type any occurrences of such values across the app. Including classes describing database entities
+```typescript
+// Bad
+roleId: string;
+// Good
+roleId: UserRolesEnum;
+```
+When deleting enum, it of course should be removed from the database as well, performing any related data manipulations required.
+
+*Using enums in your migrations has a downside of not being able to remove the enum value without changing old migrations.
+You can avoid it using direct values instead of references to enums, when writing migrations. Or simply replace removable enum values with their string identifiers.
+As long as you keep it in mind, it's OK.*
+
+## How to run migrations
+// Describe when implemented
+
+## Reference tables of many-to-many relations should always have separate primary identifier column
+When creating a reference table, it is generally recommended to create a separate primary key column for the table. The primary key column serves as a unique identifier for each row in the table, and it is used to enforce data integrity and ensure that the table can be efficiently indexed and queried.
+
+In addition, creating a separate primary key column allows you to easily reference the rows in the table from other tables using foreign keys. This can be important for maintaining the relationships between tables and ensuring data consistency.
+
+While it is possible to use other columns as a primary key, such as a combination of columns or a column that already contains unique values, this approach can be less efficient and may lead to issues with data consistency in the long run.
+
+In addition, using a separate identifier column allows you to add additional data to the reference table in the future, without having to modify the primary key or foreign key columns. For example, you may want to add a status column to track whether the relationship is active or inactive.
+
+So, as the bottom-line, having separate primary identifier worth it at least in terms of consistency.  
