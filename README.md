@@ -33,8 +33,39 @@ When running docker container on windows, make sure you specify volume using Win
 ```shell
 docker run -it -v h:\dockercache:/app/db practitest-migrator
 ```
-### Running prebuild image
-The application has a prebuilt version stored in a registry.
+### Running prebuilt images from GitHub Container Registry
+
+The application has prebuilt multi-platform Docker images available from GitHub Container Registry that support both AMD64 and ARM64 architectures.
+
+**Latest stable version:**
+```shell
+docker pull ghcr.io/practitest/testrail-importer:latest
+docker run -it --env-file='./.env.local' ghcr.io/practitest/testrail-importer:latest
+```
+
+**Specific version (recommended for production):**
+```shell
+docker pull ghcr.io/practitest/testrail-importer:v1.0.0
+docker run -it --env-file='./.env.local' ghcr.io/practitest/testrail-importer:v1.0.0
+```
+
+**With volume mapping for data persistence:**
+```shell
+docker run -it \
+  --env-file='./.env.local' \
+  -v "$(pwd)/db:/app/db" \
+  ghcr.io/practitest/testrail-importer:latest
+```
+
+#### Available image tags:
+- `latest` - Latest stable build from main branch
+- `v1.0.0`, `v1.0.1`, etc. - Specific release versions
+- `v1.0`, `v1`, etc. - Major/minor version tags
+
+No authentication is required as the images are publicly available.
+
+### Legacy registry (deprecated)
+The following registry is deprecated and will be removed in future versions:
 
 Image: `git.xxx.org:4567/practitest-migration-tool:release-<version>`
 
@@ -44,8 +75,6 @@ docker login git.xxx.org:4567 -u <username> -p <token>
 
 docker run -it git.xxx.org:4567/practitest-migration-tool:release-0.0.1
 ```
-
-If you have credentials, then you can run the build image by executing the
 
 ### Backend
 - [Backend naming conventions](misc/instructions/backend-naming-conventions.md)
