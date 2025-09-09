@@ -7,7 +7,6 @@ on:
     paths-ignore:
       - 'README.md'
       - '*.md'
-      - 'docs/**'
 
 env:
   REGISTRY: ghcr.io
