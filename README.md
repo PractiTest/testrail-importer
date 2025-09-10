@@ -2,6 +2,11 @@
 
 This project was generated using [Nest CLI](https://nestjs.com).
 
+## Running TestRail migration tool
+Look `.env.example` file, download it, and update it according to your settings. In the following examples, we assume that you renamed it to .env.local.
+The easiset way is to run [the prebuilt image](#running-prebuilt-images-from-github-container-registry).
+
+
 ## Docker
 ### Build locally
 ```shell
@@ -33,7 +38,8 @@ When running docker container on windows, make sure you specify volume using Win
 ```shell
 docker run -it -v h:\dockercache:/app/db practitest-migrator
 ```
-### Running prebuilt images from GitHub Container Registry
+
+## Running prebuilt images from GitHub Container Registry
 
 The application has prebuilt multi-platform Docker images available from GitHub Container Registry that support both AMD64 and ARM64 architectures.
 
@@ -64,17 +70,6 @@ docker run -it \
 
 No authentication is required as the images are publicly available.
 
-### Legacy registry (deprecated)
-The following registry is deprecated and will be removed in future versions:
-
-Image: `git.xxx.org:4567/practitest-migration-tool:release-<version>`
-
-#### Example:
-```shell
-docker login git.xxx.org:4567 -u <username> -p <token>
-
-docker run -it git.xxx.org:4567/practitest-migration-tool:release-0.0.1
-```
 
 ### Backend
 - [Backend naming conventions](misc/instructions/backend-naming-conventions.md)
