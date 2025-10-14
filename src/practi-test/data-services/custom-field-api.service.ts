@@ -105,4 +105,10 @@ export class PTCustomFieldsApiService implements IPTCustomFieldsApiService {
 			`projects/${projectId}/custom_fields/prepare_testrail_import.json`,
 		);
 	};
+
+	public connectTestsToFolders = async (projectId: number): Promise<void> => {
+		await this.httpService.axiosRef.post(
+			`projects/${projectId}/custom_fields/connect_tests_to_folders.json`,
+		);
+	};
 }

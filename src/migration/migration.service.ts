@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { confirm } from '@inquirer/prompts';
+import { confirm, select } from '@inquirer/prompts';
 
 import { UserMigrationService } from './services/user-migration.service';
 import { CaseMigrationService } from './services/case-migration.service';
@@ -24,6 +24,7 @@ import { IMigrationProcessInfo } from 'src/migration/types/migration-process-inf
 import { registerCtrlCListener, registerExitListener } from 'src/core/utils/process.utils';
 import { MigrationInitializationService } from 'src/migration/services/migration-initialization.service';
 import { IAppConfig } from 'src/core/types/app.config';
+import { PTCustomFieldsApiService } from 'src/practi-test/data-services';
 
 @Injectable()
 export class MigrationService {
@@ -44,6 +45,7 @@ export class MigrationService {
 		private readonly attachmentMigrationService: AttachmentMigrationService,
 		private readonly statisticsService: StatisticsService,
 		private readonly configService: ConfigService<IAppConfig>,
+		private readonly ptCustomFieldsApiService: PTCustomFieldsApiService,
 	) {
 		registerCtrlCListener(this.logger);
 		registerExitListener(this.logger, this.statisticsService);
@@ -182,6 +184,10 @@ export class MigrationService {
 				this.logger.log({ message: this.getEntitySkippingMessage(MigrationEntityStep.ATTACHMENT) });
 			}
 
+			if (await this.promptUserForTRFoldersMigration()) {
+			await this.ptCustomFieldsApiService.connectTestsToFolders(this.currentMigrationProcess.destinationProjectId);
+			}
+
 			await this.handleSuccess();
 		} catch (error) {
 			await this.handleFail(error);
@@ -231,4 +237,12 @@ export class MigrationService {
 	private async updateMigrationStatus(status: MigrationDataStatus): Promise<void> {
 		await this.migrationDataService.updateById(this.currentMigrationProcess.id!, { status });
 	}
+
+	private readonly promptUserForTRFoldersMigration = async (): Promise<boolean> => {
+		this.logger.log({ message: 'Migration finished...' });
+
+		return confirm({
+			message: 'Would you like to create folders as the TestRail section was?',
+		});
+	};
 }
